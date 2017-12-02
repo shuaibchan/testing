@@ -1,10 +1,11 @@
 var user = {}
+var db = require("../helpers/db")
 
 user.post = function(request, response) {
   var body = request.body
   var name = body.name
 
-  if (!name) {
+  if (!name) {//validate
     return response.status(400).json({
       message: "name is required"
     })
@@ -13,9 +14,25 @@ user.post = function(request, response) {
       message: "name must not empty"
     })
   }
-	return response.status(200).json({
-    name: name
+
+  db('users').insert({//insert
+    name: name,
+    lastname: "abc"
   })
+    .returning(['id', 'name', 'lastname'])
+    .then(function(data) {
+      console.log(data)
+      var user = data[0]
+      return response.status(200).json({
+        name: user.name,
+        lastname: user.lastname
+      })
+    })
+    .catch(function(error) {
+      console.log(error)
+    })
+
+
 }
 
 module.exports = user
